@@ -10,6 +10,8 @@ class Board(object):
 
     def __setitem__(self, index, value):
         x, y = index
+        if type(value) is int:
+            value = {value}
         self.cells[x + y * 5] = value
 
     def row(self, y):
@@ -36,14 +38,22 @@ class Board(object):
                 self[x, y] &= self._get_possible_values(*column)
 
     def update_constraints(self):
+        changed = False
+
+        # Finding bombs.
         for y, row in enumerate(self.row(i) for i in range(5)):
             n_possible_bombs = [cell for cell in row if 0 in cell]
             n_expected_bombs = self.rows[y][1]
             assert len(n_possible_bombs) >= n_expected_bombs
             if len(n_possible_bombs) == n_expected_bombs:
                 for cell in n_possible_bombs:
-                    cell.clear()
-                    cell.add(0)
+                    if cell != {0}:
+                        cell.clear()
+                        cell.add(0)
+                        changed = True
+
+        if changed:
+            self.update_constraints()
 
     def __repr__(self):
         result = []
@@ -57,9 +67,21 @@ class Board(object):
 if __name__ == '__main__':
     #b = Board(rows=[(6, 1), (5, 0), (5, 1), (3, 3), (5, 2)],
     #          columns=[(5, 1), (6, 1), (5, 2), (3, 2), (5, 1)])
-    b = Board(rows=[(3, 2), (5, 0), (5, 0), (0, 0), (0, 0)],
-              columns=[(4, 1), (4, 1), (5, 0), (5, 0), (5, 0)])
+    b = Board(rows=[(2, 3), (5, 1), (6, 1), (7, 1), (5, 1)],
+              columns=[(2, 3), (7, 1), (7, 0), (6, 1), (3, 2)])
     b.load_constraints()
+    b[2, 0] = 1
+    b[2, 1] = 1
+    b[2, 2] = 1
+    b[2, 3] = 3
+    b[2, 4] = 1
+
+    b[3, 2] = 2
+    b[3, 3] = 2
+
+    b[1, 3] = 1
+    b[1, 2] = 2
+    b[1, 1] = 2
     b.update_constraints()
     print(b)
 
