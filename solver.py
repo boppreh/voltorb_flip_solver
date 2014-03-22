@@ -29,9 +29,19 @@ class Board(object):
             for y in range(0, 5):
                 self[x, y] &= self._get_possible_values(*column)
 
+    def __repr__(self):
+        result = []
+        for y in range(5):
+            for x in range(5):
+                str_cell = ''.join(map(str, sorted(self[x, y])))
+                result.append('{0:4} '.format(str_cell))
+            result.append('\n')
+        return ''.join(result)
+
 if __name__ == '__main__':
     b = Board(rows=[(6, 1), (5, 0), (5, 1), (3, 3), (5, 2)],
               columns=[(5, 1), (6, 1), (5, 2), (3, 2), (5, 1)])
     b.update_constraints()
     print(b[1, 1])
+    print(b)
 
