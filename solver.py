@@ -8,11 +8,30 @@ class Board(object):
         x, y = index
         return self.cells[x + y * 5]
 
-    def update_cnstraints(self):
-        pass
+    def __setitem__(self, index, value):
+        x, y = index
+        self.cells[x + y * 5] = value
+
+    def _get_possible_values(self, cell_total, n_bombs):
+        numbers_count = 5 - n_bombs
+        max_number = cell_total - numbers_count + 1
+        possible_values = set(range(1, max_number + 1))
+        if n_bombs > 0:
+            possible_values.add(0)
+        return possible_values
+
+    def update_constraints(self):
+        for y, row in enumerate(self.rows):
+            for x in range(0, 5):
+                self[x, y] &= self._get_possible_values(*row)
+
+        for x, column in enumerate(self.columns):
+            for y in range(0, 5):
+                self[x, y] &= self._get_possible_values(*column)
 
 if __name__ == '__main__':
     b = Board(rows=[(6, 1), (5, 0), (5, 1), (3, 3), (5, 2)],
               columns=[(5, 1), (6, 1), (5, 2), (3, 2), (5, 1)])
+    b.update_constraints()
     print(b[1, 1])
 
